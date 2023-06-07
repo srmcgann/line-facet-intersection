@@ -35,3 +35,61 @@
       let p1_ = Math.atan2(X2_-X1_,Z2_-Z1_)
       let p2_ = -(Math.acos((Y2_-Y1_)/(Math.hypot(X2_-X1_,Y2_-Y1_,Z2_-Z1_)+.001))+Math.PI/2)
       let isc = false, iscs = [false,false,false]
+      for(let m=3;m--;){
+        if(isc === false){
+          X = X1, Y = Y1, Z = Z1
+          R_(0,-p2_,-p1_)
+          rotSwitch(m)
+          X1_ = X, Y1_ = Y, Z1_ = Z = 5, X = X2, Y = Y2, Z = Z2
+          R_(0,-p2_,-p1_)
+          rotSwitch(m)
+          X2_ = X, Y2_ = Y, Z2_ = Z
+          facet.map((q_,j_)=>{
+            if(isc === false){
+              let l = j_
+              X = facet[l][0], Y = facet[l][1], Z = facet[l][2]
+              R_(0,-p2_,-p1_)
+              rotSwitch(m)
+              let X3_=X, Y3_=Y, Z3_=Z
+              l = (j_+1)%facet.length
+              X = facet[l][0], Y = facet[l][1], Z = facet[l][2]
+              R_(0,-p2_,-p1_)
+              rotSwitch(m)
+              let X4_ = X, Y4_ = Y, Z4_ = Z
+              if(l_=I_(X1_,Y1_,X2_,Y2_,X3_,Y3_,X4_,Y4_)) iscs[m] = l_
+            }
+          })
+        }
+      }
+      if(iscs.filter(v=>v!==false).length==3){
+        let iscx = iscs[1][0], iscy = iscs[0][1], iscz = iscs[0][0]
+        let pointInPoly = true
+        ax=0, ay=0, az=0
+        facet.map((q_, j_)=>{ ax+=q_[0], ay+=q_[1], az+=q_[2] })
+        ax/=facet.length, ay/=facet.length, az/=facet.length
+        X = ax, Y = ay, Z = az
+        R_(0,-p2_,-p1_)
+        X1_ = X, Y1_ = Y, Z1_ = Z
+        X2_ = iscx, Y2_ = iscy, Z2_ = iscz
+        facet.map((q_,j_)=>{
+          if(pointInPoly){
+            let l = j_
+            X = facet[l][0], Y = facet[l][1], Z = facet[l][2]
+            R_(0,-p2_,-p1_)
+            let X3_ = X, Y3_ = Y, Z3_ = Z
+            l = (j_+1)%facet.length
+            X = facet[l][0], Y = facet[l][1], Z = facet[l][2]
+            R_(0,-p2_,-p1_)
+            let X4_ = X, Y4_ = Y, Z4_ = Z
+            if(I_(X1_,Y1_,X2_,Y2_,X3_,Y3_,X4_,Y4_)) pointInPoly = false
+          }
+        })
+        if(pointInPoly){
+          X = iscx, Y = iscy, Z = iscz
+          R_(0,p2_,0)
+          R_(0,0,p1_)
+          isc = [X,Y,Z]
+        }
+      }
+      return isc
+    }
